@@ -1,0 +1,10 @@
+<resources>
+    // Recipe Activity
+    <string name="welcome_text">Hi everyone</string>
+    <string name="category_add_button">good</string>
+    <string name="app_name">Recipe Manager</string>
+
+    // Recipe Entry Fragment
+    <string name="recipe_category">Category</string>
+    <string name="recipe_name">Name</string>
+</resources>
