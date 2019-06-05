@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,7 @@ public class RecipeEntryFragment extends Fragment {
         return new RecipeEntryFragment();
     }
 
-    private GridLayout recipeEntryFragmentLayout;
+    private NestedScrollView recipeEntryFragmentLayout;
 
     @Nullable
     @Override
@@ -26,7 +27,7 @@ public class RecipeEntryFragment extends Fragment {
             @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         recipeEntryFragmentLayout =
-                (GridLayout) inflater.inflate(R.layout.recipe_entry_fragment_layout, null);
+                (NestedScrollView) inflater.inflate(R.layout.recipe_entry_fragment_layout, null);
 
         return recipeEntryFragmentLayout;
     }
