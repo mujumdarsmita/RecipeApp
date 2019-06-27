@@ -8,7 +8,7 @@
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_row="6"
+        android:layout_row="7"
         android:layout_column="2"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
@@ -72,62 +72,25 @@
             android:layout_row="3"
             android:layout_column="1"/>
 
-        <TextView
-            android:id="@+id/display_image"
-            android:layout_width="0dp"
+        <Button
+            android:id="@+id/save_btn"
             android:layout_height="wrap_content"
-            android:text="@string/display_image"
-            android:textAlignment="center"
-            android:layout_columnWeight="1"
-            android:layout_row="4"
-            android:layout_column="0"/>
-
-        <android.support.v7.widget.AppCompatEditText
-            android:id="@+id/display_image_upload"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/upload_display_image"
+            android:layout_width="wrap_content"
+            android:layout_row="7"
+            android:layout_column="0"
             android:layout_columnWeight="2"
-            android:layout_row="4"
-            android:layout_column="1"/>
+            android:text="Add"
+            />
 
-        <TextView
-            android:id="@+id/additional_image"
-            android:layout_width="0dp"
+        <Button
+            android:id="@+id/view_btn"
             android:layout_height="wrap_content"
-            android:text="@string/add_more_photos"
-            android:textAlignment="center"
-            android:layout_columnWeight="1"
-            android:layout_row="5"
-            android:layout_column="0"/>
-
-        <android.support.v7.widget.AppCompatEditText
-            android:id="@+id/additional_image_upload"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/upload_more_photos"
+            android:layout_width="wrap_content"
+            android:layout_row="7"
+            android:layout_column="1"
             android:layout_columnWeight="2"
-            android:layout_row="5"
-            android:layout_column="1"/>
-
-        <TextView
-            android:id="@+id/comments"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/comments"
-            android:textAlignment="center"
-            android:layout_columnWeight="1"
-            android:layout_row="6"
-            android:layout_column="0"/>
-
-        <android.support.v7.widget.AppCompatEditText
-            android:id="@+id/comments_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/comments_text"
-            android:layout_columnWeight="2"
-            android:layout_row="6"
-            android:layout_column="1"/>
+            android:text="View"
+            />
 
         <!--<android.support.v7.widget.AppCompatImageButton-->
             <!--android:id="@+id/ingredients_add_button"-->
