@@ -23,15 +23,15 @@ public class RecipeRowData {
     this.ingredients = new ArrayList<>();
   }
 
-  public void addCategory(CategoryRowData categoryName) {
-    if (categoryName != null) {
+  public void addCategory(CategoryRowData categoryRowData) {
+    if (categoryRowData == null) {
       return;
     }
-    categoriesList.add(categoryName);
+    categoriesList.add(categoryRowData);
   }
 
   public void addIngredient(IngredientRowData ingredientRowData) {
-    if (ingredientRowData != null) {
+    if (ingredientRowData == null) {
       return;
     }
     ingredients.add(ingredientRowData);
