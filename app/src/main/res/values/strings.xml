@@ -1,20 +1,20 @@
 <resources>
     // Recipe Activity
     <string name="welcome_text">Hi everyone</string>
-    <string name="category_add_button">Add Recipe</string>
     <string name="app_name">Recipe Manager</string>
 
     // Recipe Entry Fragment
     <string name="recipe_category">Category</string>
     <string name="recipe_name">Name</string>
     <string name="ingredients">Ingredients</string>
-    <string name="ingredients_list">Add Ingredients</string>
+    <string name="ingredients_name">Ingredient name</string>
+    <string name="quantity">Qty</string>
+    <string name="units">Units</string>
     <string name="display_image">Recipe Photo</string>
     <string name="upload_display_image">Upload photo</string>
     <string name="add_more_photos">More Photos</string>
     <string name="upload_more_photos">Upload photos</string>
     <string name="comments">Add Comments</string>
     <string name="comments_text">comment here</string>
-
 
 </resources>

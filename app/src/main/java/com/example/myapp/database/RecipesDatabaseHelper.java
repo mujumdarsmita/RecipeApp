@@ -43,10 +43,6 @@ public class RecipesDatabaseHelper extends SQLiteOpenHelper {
     Runnable insertDatabaseRunnable = new Runnable() {
       @Override
       public void run() {
-        if (writableDatabase == null) {
-
-
-        }
         for (CategoryRowData categoryRowData : recipeRowData.getCategoryData()) {
           writableDatabase.insert(
               CategoryContract.CATEGORY_TABLE_NAME, null, categoryRowData.getContentValues());
@@ -63,12 +59,23 @@ public class RecipesDatabaseHelper extends SQLiteOpenHelper {
     backgroundExecutor.execute(insertDatabaseRunnable);
   }
 
-  private void update() {
-    categoriesData = new CategoriesData(this);
-    recipesData = new RecipesData(this);
+  public synchronized CategoriesData getCategoriesData() {
+    return categoriesData;
   }
 
-  public void logDB(){
+  public synchronized RecipesData getRecipesData() {
+    return recipesData;
+  }
+
+  private synchronized void update() {
+    categoriesData = new CategoriesData(this);
+    recipesData = new RecipesData(this);
+
+    // TODO(Smita): Remove this after debugging.
+    logDB();
+  }
+
+  private void logDB(){
     for (RecipeRowData recipeRowData : recipesData.getRecipes()) {
       Log.i(RecipeContract.RECIPE_TABLE_NAME, recipeRowData.getName());
       for (CategoryRowData categoryRowData : recipeRowData.getCategoryData()) {
@@ -91,7 +98,7 @@ public class RecipesDatabaseHelper extends SQLiteOpenHelper {
 
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    // Update the database based on values altered by the user.
+    // TODO(Smita): Figure out a better update policy.
     db.execSQL(RecipeContract.SQL_DELETE_RECIPE_TABLE);
     db.execSQL(CategoryContract.SQL_DELETE_CATEGORY_TABLE);
     db.execSQL(IngredientsContract.SQL_DELETE_INGREDIENTS_TABLE);

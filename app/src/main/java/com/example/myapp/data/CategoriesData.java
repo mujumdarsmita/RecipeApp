@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Looper;
-import android.support.annotation.UiThread;
 import android.support.v4.util.Preconditions;
 import com.example.myapp.database.CategoryContract;
 import com.example.myapp.database.RecipeContract;
@@ -44,7 +43,7 @@ public class CategoriesData {
     String recipeNames = cursor.getString(recipeNamesColumnId);
 
     return new CategoryGroupData(cursor.getString(nameColumnId),
-                                 Arrays.asList(recipeNames.split(":")));
+                                 Arrays.asList(recipeNames.split(",")));
   }
 
 
