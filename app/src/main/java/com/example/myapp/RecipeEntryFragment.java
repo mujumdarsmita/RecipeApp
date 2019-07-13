@@ -6,12 +6,17 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.example.myapp.data.CategoryRowData;
+import com.example.myapp.data.IngredientRowData;
+import com.example.myapp.data.RecipeRowData;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class RecipeEntryFragment extends Fragment {
 
@@ -37,6 +42,9 @@ public class RecipeEntryFragment extends Fragment {
 
   private LinearLayout recipeEntryFragmentLayout;
   private OnViewCreatedCallback callback;
+  private IngredientsListAdapter arrayAdapter;
+  private String recipeName;
+  private String recipeCategory;
 
   @Nullable
   @Override
@@ -59,31 +67,72 @@ public class RecipeEntryFragment extends Fragment {
     if (callback != null) {
       callback.onViewCreated(view);
     }
+
     RecyclerView recyclerView = recipeEntryFragmentLayout.findViewById(R.id.ingredients_list);
     recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-    final IngredientsListAdapter arrayAdapter = new IngredientsListAdapter();
+    arrayAdapter = new IngredientsListAdapter();
     recyclerView.setAdapter(arrayAdapter);
+    addIngredientsRow();
 
     ImageView imageView = recipeEntryFragmentLayout.findViewById(R.id.add_ingredients_button);
     imageView.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        if (arrayAdapter.isEmpty() || canEnableAddButton()) {
-          arrayAdapter.add(new IngredientsListAdapter.IngredientUserData());
+        addIngredientsRow();
+      }
+    });
+
+    View recipeNameView = recipeEntryFragmentLayout.findViewById(R.id.recipe_name_text);
+    recipeNameView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+      @Override
+      public void onFocusChange(View view, boolean hasFocus) {
+        if (hasFocus) {
+          return;
         }
+        recipeName = ((EditText) view).getText().toString();
+      }
+    });
+
+    View recipeCategoryView = recipeEntryFragmentLayout.findViewById(R.id.recipe_category_text);
+    recipeCategoryView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+      @Override
+      public void onFocusChange(View view, boolean hasFocus) {
+        if (hasFocus) {
+          return;
+        }
+        recipeCategory = ((EditText) view).getText().toString();
       }
     });
 
     super.onViewCreated(view, savedInstanceState);
   }
 
-  private boolean canEnableAddButton() {
-    return true;
+  @Nullable
+  public RecipeRowData getRecipeRowData() {
+    List<IngredientRowData> ingredientRows = arrayAdapter.getIngredientRows();
+    if (ingredientRows == null
+        || TextUtils.isEmpty(recipeName)
+        || TextUtils.isEmpty(recipeCategory)) {
+      return null;
+    }
+
+    RecipeRowData recipeRowData = new RecipeRowData(recipeName);
+    recipeRowData.addCategory(new CategoryRowData(recipeCategory, recipeName));
+
+    for (IngredientRowData rowData : ingredientRows) {
+      recipeRowData.addIngredient(rowData);
+    }
+    return recipeRowData;
   }
 
-  public void onBackPressed() {
+  public void removeFragment() {
     // Clean up the fragment.
     getFragmentManager().beginTransaction().remove(this).commit();
+  }
+
+  private void addIngredientsRow() {
+    if (arrayAdapter.isDataValid()) {
+      arrayAdapter.add();
+    }
   }
 }

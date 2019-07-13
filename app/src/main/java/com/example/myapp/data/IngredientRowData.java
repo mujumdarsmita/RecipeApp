@@ -3,6 +3,8 @@ package com.example.myapp.data;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.support.v4.util.Preconditions;
+import android.text.TextUtils;
+import android.widget.EditText;
 import com.example.myapp.database.IngredientsContract;
 import com.example.myapp.database.RecipeContract;
 
@@ -11,16 +13,26 @@ import com.example.myapp.database.RecipeContract;
  */
 @SuppressLint("RestrictedApi")
 public final class IngredientRowData {
-  private final String name;
-  private final float quantity;
-  private final String unit;
-  private final String recipeName;
+
+  // TODO(smita): Convert this to a builder pattern.
+  public String name;
+  public float quantity;
+  public String unit;
+  public String recipeName;
+
+  public static IngredientRowData getEmptyInstance() {
+    return new IngredientRowData(null, 0, null, null);
+  }
+
+  public static IngredientRowData getInstance(IngredientRowData rowData) {
+    return new IngredientRowData(rowData.name, rowData.quantity, rowData.unit, rowData.recipeName);
+  }
 
   public IngredientRowData(String name, float quantity, String unit, String recipeName) {
-    this.name = Preconditions.checkStringNotEmpty(name);
+    this.name = name;
     this.quantity = quantity;
     this.unit = unit;
-    this.recipeName = Preconditions.checkStringNotEmpty(recipeName);
+    this.recipeName = recipeName;
   }
 
   public String getName() {
@@ -43,4 +55,9 @@ public final class IngredientRowData {
     contentValues.put(RecipeContract.RecipeEntry.RECIPE_NAME, recipeName);
     return contentValues;
   }
+
+  public boolean validate() {
+    return !TextUtils.isEmpty(name) && quantity != 0 && !TextUtils.isEmpty(unit);
+  }
+
 }

@@ -85,7 +85,7 @@ public class FabController {
           onSaveClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-              // Call save fragment..
+              recipesController.saveRecipe();
             }
           };
         }

@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.transition.*;
 import android.view.View;
 import android.view.ViewGroup;
+import com.example.myapp.data.RecipeRowData;
 import com.example.myapp.database.RecipesDatabaseHelper;
 
 /**
@@ -52,6 +53,21 @@ public class RecipesController {
                    .commit();
   }
 
+  public void saveRecipe() {
+    if (recipeEntryFragment == null) {
+      return;
+    }
+    RecipeRowData recipeRowData = recipeEntryFragment.getRecipeRowData();
+    if (recipeRowData == null) {
+      // TODO(Smita): Cannot save. Most likely missing fields. Ensure that save button is not
+      //  highlighted until ready to save.
+      return;
+    }
+
+    recipesDatabaseHelper.insert(recipeRowData);
+    maybeHideRecipeEntryFragment();
+  }
+
   private Transition getRecipeEntrySceneTransition(View view) {
     TransitionSet transitionSet = new TransitionSet();
     ChangeBounds changeBounds = new ChangeBounds();
@@ -75,9 +91,9 @@ public class RecipesController {
     return transitionSet;
   }
 
-  public boolean onBackPressed() {
+  public boolean maybeHideRecipeEntryFragment() {
     if (recipeEntryFragment != null) {
-      recipeEntryFragment.onBackPressed();
+      recipeEntryFragment.removeFragment();
       recipeEntryFragment = null;
       actionFragmentContainer.removeAllViews();
       actionFragmentContainer.setVisibility(View.GONE);

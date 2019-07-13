@@ -16,7 +16,7 @@ public class RecipeActivity extends AppCompatActivity {
 
   @Override
   public void onBackPressed() {
-    if (recipesController.onBackPressed()) {
+    if (recipesController.maybeHideRecipeEntryFragment()) {
       return;
     }
     super.onBackPressed();
