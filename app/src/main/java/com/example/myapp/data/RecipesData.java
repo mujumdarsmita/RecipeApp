@@ -9,21 +9,25 @@ import com.example.myapp.database.CategoryContract;
 import com.example.myapp.database.IngredientsContract;
 import com.example.myapp.database.RecipeContract;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 @SuppressLint("RestrictedApi")
 public class RecipesData {
 
-  private final ArrayList<RecipeRowData> recipeList;
+  private final HashMap<String, RecipeRowData> recipeList;
 
   public RecipesData(SQLiteOpenHelper sqLiteOpenHelper) {
     Preconditions.checkArgument(Looper.myLooper() != Looper.getMainLooper());
-    this.recipeList = new ArrayList<>();
+    this.recipeList = new HashMap<>();
     queryRecipes(sqLiteOpenHelper);
   }
 
-  public ArrayList<RecipeRowData> getRecipes() {
+  public HashMap<String, RecipeRowData> getRecipes() {
     return recipeList;
+  }
+
+  public RecipeRowData getRecipeRowData(String recipeName) {
+    return recipeList.containsKey(recipeName) ? recipeList.get(recipeName) : null;
   }
 
   private void queryRecipes(SQLiteOpenHelper sqLiteOpenHelper) {
@@ -36,7 +40,7 @@ public class RecipesData {
       RecipeRowData recipe = new RecipeRowData(recipeName);
       updateIngredients(sqLiteOpenHelper, recipe);
       updateCategories(sqLiteOpenHelper, recipe);
-      recipeList.add(recipe);
+      recipeList.put(recipeName, recipe);
     }
     cursor.close();
   }

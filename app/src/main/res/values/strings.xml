@@ -1,6 +1,7 @@
 <resources>
     // Recipe Activity
-    <string name="welcome_text">Hi everyone</string>
+    <string name="welcome_text">Looks like there are no recipes saved. \n Add recipes to view here
+        .</string>
     <string name="app_name">Recipe Manager</string>
 
     // Recipe Entry Fragment

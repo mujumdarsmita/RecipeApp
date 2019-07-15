@@ -11,5 +11,7 @@
     <color name="headingTextColor">#000000</color>
     <color name="backgroundColor_100">#f5f5f5</color>
     <color name="backgroundColor_200">#EEEEEE</color>
+    <color name="backgroundColor_300">#E0E0E0</color>
+    <color name="backgroundColor_400">#BDBDBD</color>
     <color name="primaryRemoveColor">#F44336</color>
 </resources>

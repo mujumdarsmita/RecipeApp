@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
     android:layout_marginTop="4dp"
     android:layout_marginBottom="4dp">
 
@@ -10,37 +9,37 @@
         android:id="@+id/name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
         android:layout_weight="1"
-        android:singleLine="true"
         android:ellipsize="end"
         android:hint="@string/ingredients_name"
-        android:layout_marginEnd="4dp"
-        android:inputType="textFilter"/>
+        android:inputType="textFilter"
+        android:singleLine="true" />
 
     <EditText
         android:id="@+id/quantity"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
-        android:singleLine="true"
+        android:layout_marginEnd="4dp"
         android:ellipsize="end"
         android:hint="@string/quantity"
-        android:layout_marginEnd="4dp"
-        android:inputType="numberDecimal"/>
+        android:inputType="numberDecimal"
+        android:singleLine="true" />
 
     <EditText
         android:id="@+id/unit"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
-        android:singleLine="true"
+        android:layout_marginEnd="4dp"
         android:ellipsize="end"
         android:hint="@string/units"
-        android:layout_marginEnd="4dp"
-        android:inputType="text"/>
+        android:inputType="text"
+        android:singleLine="true" />
 
     <ImageView
         android:id="@+id/remove_bottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_remove_circle_outline_black_24dp"/>
+        android:src="@drawable/ic_remove_circle_outline_black_24dp" />
 
 </LinearLayout>

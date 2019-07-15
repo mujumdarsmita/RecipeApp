@@ -8,6 +8,7 @@ import android.support.v4.util.Preconditions;
 import com.example.myapp.database.CategoryContract;
 import com.example.myapp.database.RecipeContract;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,12 +33,16 @@ public class CategoriesData {
 
     Cursor cursor = sqLiteOpenHelper.getReadableDatabase().rawQuery(SQL_QUERY_CATEGORY_GROUP, null);
     while(cursor.moveToNext()) {
-      categoryGroups.add(getCategoryGroupData(cursor));
+      categoryGroups.add(getCategoryGroupDatas(cursor));
     }
     cursor.close();
   }
 
-  private CategoryGroupData getCategoryGroupData(Cursor cursor) {
+  public List<CategoryGroupData> getCategoryGroupDatas() {
+    return categoryGroups;
+  }
+
+  private CategoryGroupData getCategoryGroupDatas(Cursor cursor) {
     int nameColumnId = cursor.getColumnIndexOrThrow(CategoryContract.CategoryEntry.CATEGORY_NAME);
     int recipeNamesColumnId = cursor.getColumnIndexOrThrow(RECIPE_NAMES);
     String recipeNames = cursor.getString(recipeNamesColumnId);
@@ -50,7 +55,7 @@ public class CategoriesData {
   /**
    * Class which represent the mapping of a category and associated recipes.
    */
-  private static class CategoryGroupData {
+  public static class CategoryGroupData implements Serializable {
     private final String categoryName;
     private final List<String> recipeNames;
     // TODO(smita): Add image of the category here ?
@@ -59,6 +64,14 @@ public class CategoriesData {
     private CategoryGroupData(String categoryName, List<String> recipeNames) {
       this.categoryName = categoryName;
       this.recipeNames = recipeNames;
+    }
+
+    public String getCategoryName() {
+      return categoryName;
+    }
+
+    public List<String> getRecipeNames() {
+      return recipeNames;
     }
   }
 

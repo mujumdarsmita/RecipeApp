@@ -1,8 +1,5 @@
-package com.example.myapp;
+package com.example.myapp.controller;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IntDef;
@@ -10,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.util.Preconditions;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
+import com.example.myapp.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

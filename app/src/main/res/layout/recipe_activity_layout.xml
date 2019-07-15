@@ -5,17 +5,10 @@
     android:layout_height="match_parent"
     android:background="@color/backgroundColor_100">
 
-    <include
-        android:id="@+id/recipe_overview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        layout="@layout/recipe_overview_layout"/>
-
     <FrameLayout
         android:id="@+id/recipe_action_fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"/>
+        android:layout_height="match_parent"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

@@ -2,6 +2,7 @@ package com.example.myapp;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import com.example.myapp.controller.RecipesController;
 
 public class RecipeActivity extends AppCompatActivity {
 
@@ -16,7 +17,7 @@ public class RecipeActivity extends AppCompatActivity {
 
   @Override
   public void onBackPressed() {
-    if (recipesController.maybeHideRecipeEntryFragment()) {
+    if (recipesController.onBackPressed()) {
       return;
     }
     super.onBackPressed();

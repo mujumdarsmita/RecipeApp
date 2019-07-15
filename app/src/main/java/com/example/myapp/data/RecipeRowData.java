@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.support.v4.util.Preconditions;
 import com.example.myapp.database.RecipeContract;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * Class defining a Recipe.
  */
 @SuppressLint("RestrictedApi")
-public class RecipeRowData {
+public class RecipeRowData implements Serializable {
   private final String name;
   private final ArrayList<CategoryRowData> categoriesList;
   private final ArrayList<IngredientRowData> ingredients;
