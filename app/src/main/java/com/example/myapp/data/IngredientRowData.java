@@ -47,6 +47,10 @@ public final class IngredientRowData {
     return unit;
   }
 
+  public String getRecipeName() {
+    return recipeName;
+  }
+
   public ContentValues getContentValues() {
     ContentValues contentValues = new ContentValues();
     contentValues.put(IngredientsContract.IngredientsEntry.INGREDIENT_NAME, name);

@@ -26,6 +26,12 @@ public class CategoryContract {
   public static final String SQL_DELETE_CATEGORY_TABLE =
       "DROP TABLE IF EXISTS " + CATEGORY_TABLE_NAME;
 
+  public static String getDeleteRowSqlQuery(String categoryName, String recipeName) {
+    return "DELETE FROM " + CATEGORY_TABLE_NAME + " WHERE "
+           + CATEGORY_NAME + " = \"" + categoryName + "\" AND "
+           + RECIPE_NAME + " = \"" + recipeName + "\"";
+  }
+
   public CategoryContract() {}
 
   /**

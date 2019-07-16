@@ -29,21 +29,14 @@ import java.util.List;
 public class RecipeActionFragment extends BaseFragment {
 
   public static final String TAG = "RecipeActionFragment";
-  private static final String RECIPE_ROW_DATA = "recipe_row_data";
-  private static final String RECIPE_ACTION = "recipe_action";
 
-  public static RecipeActionFragment newInstance(
-      FragmentCallback callback, RecipeRowData recipeRowData, @RecipeAction int recipeAction) {
+  public static RecipeActionFragment newInstance(FragmentCallback callback) {
     RecipeActionFragment recipeActionFragment = new RecipeActionFragment();
-    Bundle bundle = new Bundle();
     if (callback != null) {
+      Bundle bundle = new Bundle();
       bundle.putSerializable(ON_VIEW_CREATED_CALLBACK, callback);
+      recipeActionFragment.setArguments(bundle);
     }
-    if (recipeRowData != null) {
-      bundle.putSerializable(RECIPE_ROW_DATA, recipeRowData);
-    }
-    bundle.putInt(RECIPE_ACTION, recipeAction);
-    recipeActionFragment.setArguments(bundle);
     return recipeActionFragment;
   }
 
@@ -51,13 +44,13 @@ public class RecipeActionFragment extends BaseFragment {
    * Describes the supported actions.
    */
   @Retention(RetentionPolicy.SOURCE)
-  @IntDef({ACTION_DISPLAY, ACTION_ADD, ACTION_EDIT})
+  @IntDef({ACTION_ADD, ACTION_DISPLAY, ACTION_EDIT})
   @interface RecipeAction {}
 
   // Describes the show recipe action.
-  public static final int ACTION_DISPLAY = 0;
+  public static final int ACTION_ADD = 0;
   // Describes the add recipe action.
-  public static final int ACTION_ADD = 1;
+  public static final int ACTION_DISPLAY = 1;
   // Describes the edit recipe action.
   public static final int ACTION_EDIT = 2;
 
@@ -74,6 +67,7 @@ public class RecipeActionFragment extends BaseFragment {
   private EditText recipeCategoryView;
   private View.OnFocusChangeListener recipeNameViewFocusChangeListener;
   private View.OnFocusChangeListener recipeCategoryViewFocusChangeListener;
+  private boolean isInitialized;
 
   @Nullable
   @Override
@@ -84,8 +78,6 @@ public class RecipeActionFragment extends BaseFragment {
     Bundle bundle = getArguments();
     if (bundle != null) {
       callback = (FragmentCallback) bundle.getSerializable(ON_VIEW_CREATED_CALLBACK);
-      recipeRowData = (RecipeRowData) bundle.getSerializable(RECIPE_ROW_DATA);
-      recipeAction = bundle.getInt(RECIPE_ACTION, ACTION_DISPLAY);
     }
     recipeEntryFragmentLayout =
         (LinearLayout) inflater.inflate(R.layout.recipe_entry_fragment_layout, null);
@@ -97,7 +89,11 @@ public class RecipeActionFragment extends BaseFragment {
     if (callback != null) {
       callback.onViewCreated(view);
     }
+    initialize();
+    super.onViewCreated(view, savedInstanceState);
+  }
 
+  private void initialize() {
     ingredientsListRecyclerView = recipeEntryFragmentLayout.findViewById(R.id.ingredients_list);
     ingredientsListRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     ingredientsListAdapter = new IngredientsListAdapter();
@@ -132,43 +128,69 @@ public class RecipeActionFragment extends BaseFragment {
       }
     };
 
-    initAction();
-
-    super.onViewCreated(view, savedInstanceState);
+    isInitialized = true;
+    updateMode();
   }
 
-  private void initAction() {
+  public void init(RecipeRowData recipeRowData, @RecipeAction int recipeAction) {
+    this.recipeRowData = recipeRowData;
+    this.recipeAction = recipeAction;
+    if (recipeRowData == null) {
+      Preconditions.checkArgument(recipeAction == ACTION_ADD);
+    } else {
+      Preconditions.checkArgument(recipeAction == ACTION_DISPLAY || recipeAction == ACTION_EDIT);
+    }
+    updateMode();
+  }
+
+  private void updateMode() {
+    if (!isInitialized) {
+      return;
+    }
     reset();
     switch (recipeAction) {
       case ACTION_EDIT:
+        enableUserInput();
       case ACTION_DISPLAY:
-        Preconditions.checkArgument(recipeRowData != null);
-        recipeNameView.setText(recipeRowData.getName());
+        recipeName = recipeRowData.getName();
+        recipeNameView.setText(recipeName);
         StringBuilder categoryTextBuilder = new StringBuilder();
         List<CategoryRowData> categoryRowDatas = recipeRowData.getCategoryData();
         for (CategoryRowData data : categoryRowDatas) {
           categoryTextBuilder.append(data.getCategoryName());
           categoryTextBuilder.append(", ");
         }
-        recipeCategoryView.setText(categoryTextBuilder.toString());
+        recipeCategory = categoryTextBuilder.toString();
+        recipeCategoryView.setText(recipeCategory);
         for (IngredientRowData data : recipeRowData.getIngredientData()) {
           ingredientsListAdapter.add(data);
         }
         break;
+      case ACTION_ADD:
       default:
         addIngredientsRow();
-        recipeNameView.setEnabled(true);
-        recipeNameView.setOnFocusChangeListener(recipeNameViewFocusChangeListener);
-
-        recipeCategoryView.setEnabled(true);
-        recipeCategoryView.setOnFocusChangeListener(recipeCategoryViewFocusChangeListener);
-
-        addIngredientsButton.setVisibility(View.VISIBLE);
+        enableUserInput();
         break;
     }
   }
 
+  /**
+   * Sets up the fragment to accept user input.
+   */
+  private void enableUserInput() {
+    recipeNameView.setEnabled(true);
+    recipeNameView.setOnFocusChangeListener(recipeNameViewFocusChangeListener);
+
+    recipeCategoryView.setEnabled(true);
+    recipeCategoryView.setOnFocusChangeListener(recipeCategoryViewFocusChangeListener);
+
+    addIngredientsButton.setVisibility(View.VISIBLE);
+  }
+
   private void reset() {
+    if (!isInitialized) {
+      return;
+    }
     ingredientsListAdapter.reset();
 
     recipeNameView.setText(null);
@@ -182,8 +204,25 @@ public class RecipeActionFragment extends BaseFragment {
     addIngredientsButton.setVisibility(View.GONE);
   }
 
+  public @RecipeAction int getRecipeAction() {
+    return recipeAction;
+  }
+
+  /**
+   * Returns the RecipeRowData passed into the bundle.
+   * RecipeRowData is passed into the bundle to display data.
+   */
   @Nullable
   public RecipeRowData getRecipeRowData() {
+    return recipeRowData;
+  }
+
+  /**
+   * Returns the updated RecipeRowData, i.e if the user updates the data by edit action, we want
+   * to read the new data from the different fields.
+   */
+  @Nullable
+  public RecipeRowData getUpdatedRecipeRowData() {
     List<IngredientRowData> ingredientRows = ingredientsListAdapter.getIngredientRows();
     if (ingredientRows == null
         || TextUtils.isEmpty(recipeName)
@@ -206,7 +245,7 @@ public class RecipeActionFragment extends BaseFragment {
     }
   }
 
-  private static class IngredientsListAdapter
+  private class IngredientsListAdapter
       extends RecyclerView.Adapter<IngredientsListAdapter.ViewHolder> {
 
     private final ArrayList<IngredientRowData> ingredientRowDataList;
@@ -310,10 +349,11 @@ public class RecipeActionFragment extends BaseFragment {
 
       private void update() {
         IngredientRowData rowData = ingredientRowDataList.get(getAdapterPosition());
-        enableFocusChangeListeners(true);
+        enableFocusChangeListeners(recipeAction != ACTION_DISPLAY);
         name.setText(rowData.getName());
         quantity.setText(String.valueOf(rowData.getQuantity()));
         units.setText(rowData.getUnit());
+        removeButton.setVisibility(recipeAction == ACTION_DISPLAY ? View.GONE : View.VISIBLE);
       }
 
       private void enableFocusChangeListeners(boolean enabled) {

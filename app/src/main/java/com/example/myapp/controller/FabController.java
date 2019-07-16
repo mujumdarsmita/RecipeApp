@@ -72,7 +72,7 @@ public class FabController {
           onEditClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-              // Show Edit fragment.
+              recipesController.showRecipeEditFragment();
             }
           };
         }

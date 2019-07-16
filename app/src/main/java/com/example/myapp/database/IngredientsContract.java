@@ -29,6 +29,12 @@ public class IngredientsContract {
   public static final String SQL_DELETE_INGREDIENTS_TABLE =
       "DROP TABLE IF EXISTS " + INGREDIENTS_TABLE_NAME;
 
+  public static String getDeleteRowSqlQuery(String ingredientName, String recipeName) {
+    return "DELETE FROM " + INGREDIENTS_TABLE_NAME + " WHERE "
+           + INGREDIENT_NAME + " = \"" + ingredientName + "\" AND "
+           + RECIPE_NAME + " = \"" + recipeName + "\"";
+  }
+
   public IngredientsContract() {}
 
   /**

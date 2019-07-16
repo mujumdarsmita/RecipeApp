@@ -16,6 +16,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
+import static com.example.myapp.database.CategoryContract.CategoryEntry.CATEGORY_NAME;
+import static com.example.myapp.database.CategoryContract.getDeleteRowSqlQuery;
+
 /**
  * Helper class for accessing Recipe Database.
  */
@@ -63,6 +66,39 @@ public class RecipesDatabaseHelper extends SQLiteOpenHelper {
     recipesDatabaseCallbacks.remove(callback);
   }
 
+  public void replace(final RecipeRowData recipeRowDataToDelete,
+                      final RecipeRowData updatedRecipeRowData) {
+    if (recipeRowDataToDelete == null || updatedRecipeRowData == null) {
+      return;
+    }
+
+    Runnable replaceDatabaseRunnable = new Runnable() {
+      @Override
+      public void run() {
+        deleteQuery(recipeRowDataToDelete);
+        insertQuery(updatedRecipeRowData);
+        update();
+      }
+    };
+    backgroundExecutor.execute(replaceDatabaseRunnable);
+
+  }
+
+  public void delete(final RecipeRowData recipeRowDataToDelete) {
+    if (recipeRowDataToDelete == null) {
+      return;
+    }
+
+    Runnable deleteDatabaseRunnable = new Runnable() {
+      @Override
+      public void run() {
+        deleteQuery(recipeRowDataToDelete);
+        update();
+      }
+    };
+    backgroundExecutor.execute(deleteDatabaseRunnable);
+  }
+
   public void insert(final RecipeRowData recipeRowData) {
     if (recipeRowData == null) {
       return;
@@ -71,20 +107,39 @@ public class RecipesDatabaseHelper extends SQLiteOpenHelper {
     Runnable insertDatabaseRunnable = new Runnable() {
       @Override
       public void run() {
-        for (CategoryRowData categoryRowData : recipeRowData.getCategoryData()) {
-          writableDatabase.insert(
-              CategoryContract.CATEGORY_TABLE_NAME, null, categoryRowData.getContentValues());
-        }
-        for (IngredientRowData ingredientRowData : recipeRowData.getIngredientData()) {
-          writableDatabase.insert(IngredientsContract.INGREDIENTS_TABLE_NAME,
-                                  null, ingredientRowData.getContentValues());
-        }
-        writableDatabase.insert(RecipeContract.RECIPE_TABLE_NAME,
-                                null, recipeRowData.getContentValues());
+        insertQuery(recipeRowData);
         update();
       }
     };
     backgroundExecutor.execute(insertDatabaseRunnable);
+  }
+
+  private void deleteQuery(RecipeRowData recipeRowDataToDelete) {
+    for (CategoryRowData categoryRowData : recipeRowDataToDelete.getCategoryData()) {
+      writableDatabase.execSQL(
+          CategoryContract.getDeleteRowSqlQuery(categoryRowData.getCategoryName(),
+                                                categoryRowData.getRecipeName()));
+    }
+    for (IngredientRowData ingredientRowData : recipeRowDataToDelete.getIngredientData()) {
+      writableDatabase.execSQL(
+          IngredientsContract.getDeleteRowSqlQuery(ingredientRowData.getName(),
+                                                   ingredientRowData.getRecipeName()));
+    }
+    writableDatabase.execSQL(
+        RecipeContract.getDeleteRowSqlQuery(recipeRowDataToDelete.getName()));
+  }
+
+  private void insertQuery(RecipeRowData recipeRowData) {
+    for (CategoryRowData categoryRowData : recipeRowData.getCategoryData()) {
+      writableDatabase.insert(
+          CategoryContract.CATEGORY_TABLE_NAME, null, categoryRowData.getContentValues());
+    }
+    for (IngredientRowData ingredientRowData : recipeRowData.getIngredientData()) {
+      writableDatabase.insert(IngredientsContract.INGREDIENTS_TABLE_NAME,
+                              null, ingredientRowData.getContentValues());
+    }
+    writableDatabase.insert(RecipeContract.RECIPE_TABLE_NAME,
+                            null, recipeRowData.getContentValues());
   }
 
   public synchronized CategoriesData getCategoriesData() {

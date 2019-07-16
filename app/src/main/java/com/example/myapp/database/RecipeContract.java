@@ -17,6 +17,11 @@ public class RecipeContract {
   public static final String SQL_DELETE_RECIPE_TABLE =
       "DROP TABLE IF EXISTS " + RECIPE_TABLE_NAME;
 
+  public static String getDeleteRowSqlQuery(String recipeName) {
+    return "DELETE FROM " + RECIPE_TABLE_NAME + " WHERE "
+           + RecipeEntry.RECIPE_NAME + " = \"" + recipeName + "\"";
+  }
+
   public RecipeContract() {}
 
   /**

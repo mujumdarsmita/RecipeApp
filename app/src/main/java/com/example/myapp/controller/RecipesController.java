@@ -104,25 +104,22 @@ public class RecipesController {
     fabController.setFabAction(FabController.ACTION_ADD);
   }
 
-  public void showRecipeEntryFragment() {
-    recipeActionFragment = RecipeActionFragment.newInstance(
-        new FragmentCallback() {
-          @Override
-          public void onViewCreated(View view) {
-            Scene scene = new Scene(actionFragmentContainer, view);
-            TransitionManager.go(scene, getRecipeActionSceneTransition(view));
-            fabController.setFabAction(FabController.ACTION_SAVE);
-          }
-        },
-        /*recipeRowData=*/ null,
-        RecipeActionFragment.ACTION_ADD);
-    fragmentManager.beginTransaction()
-                   .add(recipeActionFragment, RecipeActionFragment.TAG)
-                   .commit();
+  public void showRecipeEditFragment() {
+    if (recipeActionFragment == null) {
+      // There cannot be edit action if there is not fragment displayed, as such by design this
+      // should never be hit.
+      // TODO(Smita): Add error logging.
+      return;
+    }
+    recipeActionFragment.init(recipeActionFragment.getRecipeRowData(),
+                              RecipeActionFragment.ACTION_EDIT);
+    fabController.setFabAction(FabController.ACTION_SAVE);
   }
 
-  public void showRecipeFragment(RecipeRowData recipeRowData) {
-    if (recipeRowData == null) {
+  public void showRecipeEntryFragment() {
+    if (recipeActionFragment != null) {
+      // Cannot add multiple recipes at the same time. By design this should never be hit.
+      // TODO(Smita): Add error logging.
       return;
     }
     recipeActionFragment = RecipeActionFragment.newInstance(
@@ -133,9 +130,33 @@ public class RecipesController {
             TransitionManager.go(scene, getRecipeActionSceneTransition(view));
             fabController.setFabAction(FabController.ACTION_SAVE);
           }
-        },
-        recipeRowData,
-        RecipeActionFragment.ACTION_DISPLAY);
+        });
+    fragmentManager.beginTransaction()
+                   .add(recipeActionFragment, RecipeActionFragment.TAG)
+                   .commit();
+  }
+
+  public void showRecipeFragment(RecipeRowData recipeRowData) {
+    if (recipeRowData == null) {
+      // Cannot display if there is no data. By design this should never be hit.
+      // TODO(Smita): Add error logging.
+      return;
+    }
+    if (recipeActionFragment != null) {
+      recipeActionFragment.init(recipeRowData, RecipeActionFragment.ACTION_DISPLAY);
+      fabController.setFabAction(FabController.ACTION_EDIT);
+      return;
+    }
+    recipeActionFragment = RecipeActionFragment.newInstance(
+        new FragmentCallback() {
+          @Override
+          public void onViewCreated(View view) {
+            Scene scene = new Scene(actionFragmentContainer, view);
+            TransitionManager.go(scene, getRecipeActionSceneTransition(view));
+            fabController.setFabAction(FabController.ACTION_EDIT);
+          }
+        });
+    recipeActionFragment.init(recipeRowData, RecipeActionFragment.ACTION_DISPLAY);
     fragmentManager.beginTransaction()
                    .add(recipeActionFragment, RecipeActionFragment.TAG)
                    .commit();
@@ -145,15 +166,35 @@ public class RecipesController {
     if (recipeActionFragment == null) {
       return;
     }
-    RecipeRowData recipeRowData = recipeActionFragment.getRecipeRowData();
-    if (recipeRowData == null) {
-      // TODO(Smita): Cannot save. Most likely missing fields. Ensure that save button is not
-      //  highlighted until ready to save.
-      return;
-    }
 
-    recipesDatabaseHelper.insert(recipeRowData);
-    hideFragment(recipeActionFragment);
+    switch (recipeActionFragment.getRecipeAction()) {
+      case RecipeActionFragment.ACTION_ADD:
+        RecipeRowData recipeRowData = recipeActionFragment.getUpdatedRecipeRowData();
+        if (recipeRowData == null) {
+          // TODO(Smita): Cannot save. Most likely missing fields. Ensure that save button is not
+          //  highlighted until ready to save.
+          return;
+        }
+
+        recipesDatabaseHelper.insert(recipeRowData);
+        hideFragment(recipeActionFragment);
+        break;
+      case RecipeActionFragment.ACTION_EDIT:
+        RecipeRowData originalData = recipeActionFragment.getRecipeRowData();
+        RecipeRowData updatedRecipeRowData = recipeActionFragment.getUpdatedRecipeRowData();
+        if (updatedRecipeRowData == null) {
+          // TODO(Smita): Cannot save. Most likely missing fields. Ensure that save button is not
+          //  highlighted until ready to save.
+          return;
+        }
+
+        recipesDatabaseHelper.replace(originalData, updatedRecipeRowData);
+        showRecipeFragment(updatedRecipeRowData);
+        break;
+      case RecipeActionFragment.ACTION_DISPLAY:
+        // No-Op. This should never be hit.
+        break;
+    }
   }
 
   private Transition getRecipeActionSceneTransition(View view) {

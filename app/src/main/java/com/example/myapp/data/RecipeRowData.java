@@ -13,7 +13,7 @@ import java.util.List;
  * Class defining a Recipe.
  */
 @SuppressLint("RestrictedApi")
-public class RecipeRowData implements Serializable {
+public class RecipeRowData {
   private final String name;
   private final ArrayList<CategoryRowData> categoriesList;
   private final ArrayList<IngredientRowData> ingredients;
