@@ -2,6 +2,7 @@ package com.example.myapp.fragment;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
@@ -9,7 +10,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.util.Preconditions;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,13 +63,15 @@ public class RecipeActionFragment extends BaseFragment {
   private RecipeRowData recipeRowData;
   private IngredientsListAdapter ingredientsListAdapter;
   private String recipeName;
-  private String recipeCategory;
+  private List<String> recipeCategoryList;
   private RecyclerView ingredientsListRecyclerView;
   private ImageView addIngredientsButton;
   private EditText recipeNameView;
+  private Drawable recipeNameViewBackground;
   private EditText recipeCategoryView;
-  private View.OnFocusChangeListener recipeNameViewFocusChangeListener;
-  private View.OnFocusChangeListener recipeCategoryViewFocusChangeListener;
+  private Drawable recipeCategoryViewBackground;
+  private TextWatcher recipeNameViewTextWatcher;
+  private TextWatcher recipeCategoryViewTextWatcher;
   private boolean isInitialized;
 
   @Nullable
@@ -80,7 +85,7 @@ public class RecipeActionFragment extends BaseFragment {
       callback = (FragmentCallback) bundle.getSerializable(ON_VIEW_CREATED_CALLBACK);
     }
     recipeEntryFragmentLayout =
-        (LinearLayout) inflater.inflate(R.layout.recipe_entry_fragment_layout, null);
+        (LinearLayout) inflater.inflate(R.layout.recipe_action_fragment_layout, null);
     return recipeEntryFragmentLayout;
   }
 
@@ -108,23 +113,24 @@ public class RecipeActionFragment extends BaseFragment {
     });
 
     recipeNameView = recipeEntryFragmentLayout.findViewById(R.id.recipe_name_text);
+    recipeNameViewBackground = recipeNameView.getBackground();
     recipeCategoryView = recipeEntryFragmentLayout.findViewById(R.id.recipe_category_text);
-    recipeNameViewFocusChangeListener = new View.OnFocusChangeListener() {
+    recipeCategoryList = new ArrayList<>();
+    recipeCategoryViewBackground = recipeCategoryView.getBackground();
+    recipeNameViewTextWatcher = new NoOpTextChangeListener() {
       @Override
-      public void onFocusChange(View view, boolean hasFocus) {
-        if (hasFocus) {
-          return;
-        }
-        recipeName = ((EditText) view).getText().toString();
+      public void afterTextChanged(Editable editable) {
+        recipeName = editable.toString().trim();
       }
     };
-    recipeCategoryViewFocusChangeListener = new View.OnFocusChangeListener() {
+    recipeCategoryViewTextWatcher = new NoOpTextChangeListener() {
       @Override
-      public void onFocusChange(View view, boolean hasFocus) {
-        if (hasFocus) {
-          return;
+      public void afterTextChanged(Editable editable) {
+        recipeCategoryList.clear();
+        String[] recipeCategories = editable.toString().split(",");
+        for (String recipeCategory : recipeCategories) {
+          recipeCategoryList.add(recipeCategory.trim());
         }
-        recipeCategory = ((EditText) view).getText().toString();
       }
     };
 
@@ -154,14 +160,20 @@ public class RecipeActionFragment extends BaseFragment {
       case ACTION_DISPLAY:
         recipeName = recipeRowData.getName();
         recipeNameView.setText(recipeName);
-        StringBuilder categoryTextBuilder = new StringBuilder();
+        recipeCategoryList.clear();
         List<CategoryRowData> categoryRowDatas = recipeRowData.getCategoryData();
+        StringBuilder stringBuilder = null;
         for (CategoryRowData data : categoryRowDatas) {
-          categoryTextBuilder.append(data.getCategoryName());
-          categoryTextBuilder.append(", ");
+          recipeCategoryList.add(data.getCategoryName());
+          if (stringBuilder == null) {
+            stringBuilder = new StringBuilder();
+            stringBuilder.append(data.getCategoryName());
+          } else {
+            stringBuilder.append(", ");
+            stringBuilder.append(data.getCategoryName());
+          }
         }
-        recipeCategory = categoryTextBuilder.toString();
-        recipeCategoryView.setText(recipeCategory);
+        recipeCategoryView.setText(stringBuilder != null ? stringBuilder.toString() : null);
         for (IngredientRowData data : recipeRowData.getIngredientData()) {
           ingredientsListAdapter.add(data);
         }
@@ -179,12 +191,15 @@ public class RecipeActionFragment extends BaseFragment {
    */
   private void enableUserInput() {
     recipeNameView.setEnabled(true);
-    recipeNameView.setOnFocusChangeListener(recipeNameViewFocusChangeListener);
+    recipeNameView.addTextChangedListener(recipeNameViewTextWatcher);
+    recipeNameView.setBackground(recipeNameViewBackground);
 
     recipeCategoryView.setEnabled(true);
-    recipeCategoryView.setOnFocusChangeListener(recipeCategoryViewFocusChangeListener);
+    recipeCategoryView.addTextChangedListener(recipeCategoryViewTextWatcher);
+    recipeCategoryView.setBackground(recipeCategoryViewBackground);
 
     addIngredientsButton.setVisibility(View.VISIBLE);
+//    ingredientsListAdapter.enableUserInput();
   }
 
   private void reset() {
@@ -195,11 +210,13 @@ public class RecipeActionFragment extends BaseFragment {
 
     recipeNameView.setText(null);
     recipeNameView.setEnabled(false);
-    recipeNameView.setOnFocusChangeListener(null);
+    recipeNameView.removeTextChangedListener(recipeNameViewTextWatcher);
+    recipeNameView.setBackground(null);
 
     recipeCategoryView.setText(null);
     recipeCategoryView.setEnabled(false);
-    recipeCategoryView.setOnFocusChangeListener(null);
+    recipeCategoryView.removeTextChangedListener(recipeCategoryViewTextWatcher);
+    recipeCategoryView.setBackground(null);
 
     addIngredientsButton.setVisibility(View.GONE);
   }
@@ -226,14 +243,18 @@ public class RecipeActionFragment extends BaseFragment {
     List<IngredientRowData> ingredientRows = ingredientsListAdapter.getIngredientRows();
     if (ingredientRows == null
         || TextUtils.isEmpty(recipeName)
-        || TextUtils.isEmpty(recipeCategory)) {
+        || recipeCategoryList.isEmpty()) {
       return null;
     }
 
     RecipeRowData recipeRowData = new RecipeRowData(recipeName);
-    recipeRowData.addCategory(new CategoryRowData(recipeCategory, recipeName));
+    for (String recipeCategory : recipeCategoryList) {
+      recipeRowData.addCategory(new CategoryRowData(recipeCategory, recipeName));
+    }
 
     for (IngredientRowData rowData : ingredientRows) {
+      // Add recipe name here
+      rowData.recipeName = recipeName;
       recipeRowData.addIngredient(rowData);
     }
     return recipeRowData;
@@ -319,11 +340,14 @@ public class RecipeActionFragment extends BaseFragment {
       notifyDataSetChanged();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnFocusChangeListener {
+    private class ViewHolder extends RecyclerView.ViewHolder {
 
       private EditText name;
+      private TextWatcher nameTextWatcher;
       private EditText quantity;
+      private TextWatcher quantityTextWatcher;
       private EditText units;
+      private TextWatcher unitsTextWatcher;
       private ImageView removeButton;
 
       private ViewHolder(View root) {
@@ -332,11 +356,38 @@ public class RecipeActionFragment extends BaseFragment {
         quantity = root.findViewById(R.id.quantity);
         units = root.findViewById(R.id.unit);
         removeButton = root.findViewById(R.id.remove_bottom);
+        nameTextWatcher = new NoOpTextChangeListener() {
+          @Override
+          public void afterTextChanged(Editable editable) {
+            IngredientRowData rowData = ingredientRowDataList.get(getLayoutPosition());
+            rowData.name = editable.toString();
+          }
+        };
+
+        quantityTextWatcher = new NoOpTextChangeListener() {
+          @Override
+          public void afterTextChanged(Editable editable) {
+            IngredientRowData rowData = ingredientRowDataList.get(getLayoutPosition());
+            try {
+              rowData.quantity =
+                  editable.toString().isEmpty() ? 0 : Float.valueOf(editable.toString());
+            } catch (Exception e) {
+              rowData.quantity = 0;
+            }
+          }
+        };
+        unitsTextWatcher = new NoOpTextChangeListener() {
+          @Override
+          public void afterTextChanged(Editable editable) {
+            IngredientRowData rowData = ingredientRowDataList.get(getLayoutPosition());
+            rowData.unit = editable.toString();
+          }
+        };
 
         removeButton.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
-            enableFocusChangeListeners(false);
+            enableTextChangedListeners(false);
             // remove the item.
             InputMethodManager inputMethodManager =
                 (InputMethodManager) itemView.getContext().getSystemService(
@@ -349,39 +400,46 @@ public class RecipeActionFragment extends BaseFragment {
 
       private void update() {
         IngredientRowData rowData = ingredientRowDataList.get(getAdapterPosition());
-        enableFocusChangeListeners(recipeAction != ACTION_DISPLAY);
+        enableTextChangedListeners(recipeAction != ACTION_DISPLAY);
         name.setText(rowData.getName());
         quantity.setText(String.valueOf(rowData.getQuantity()));
         units.setText(rowData.getUnit());
         removeButton.setVisibility(recipeAction == ACTION_DISPLAY ? View.GONE : View.VISIBLE);
       }
 
-      private void enableFocusChangeListeners(boolean enabled) {
-        name.setOnFocusChangeListener(enabled ? this : null);
+      private void enableTextChangedListeners(boolean enabled) {
+        if (enabled) {
+          name.addTextChangedListener(nameTextWatcher);
+          quantity.addTextChangedListener(quantityTextWatcher);
+          units.addTextChangedListener(unitsTextWatcher);
+        } else {
+          name.removeTextChangedListener(nameTextWatcher);
+          quantity.removeTextChangedListener(quantityTextWatcher);
+          units.removeTextChangedListener(unitsTextWatcher);
+        }
+        name.setEnabled(enabled);
         name.clearFocus();
-        quantity.setOnFocusChangeListener(enabled ? this : null);
+        quantity.setEnabled(enabled);
         quantity.clearFocus();
-        units.setOnFocusChangeListener(enabled ? this : null);
+        units.setEnabled(enabled);
         units.clearFocus();
       }
+    }
+  }
 
-      @Override
-      public void onFocusChange(View view, boolean hasFocus) {
-        if (hasFocus) {
-          return;
-        }
+  private static class NoOpTextChangeListener implements TextWatcher {
 
-        IngredientRowData rowData = ingredientRowDataList.get(getLayoutPosition());
-        // When focus is lost save the entered values.
-        String value = ((EditText) view).getText().toString();
-        if (view == name) {
-          rowData.name = value;
-        } else if(view == quantity) {
-          rowData.quantity = Float.valueOf(value);
-        } else if(view == units) {
-          rowData.unit = value;
-        }
-      }
+    private NoOpTextChangeListener() {}
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+    @Override
+    public void afterTextChanged(Editable s) {
+
     }
   }
 }

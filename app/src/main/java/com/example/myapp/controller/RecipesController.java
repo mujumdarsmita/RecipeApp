@@ -42,6 +42,7 @@ public class RecipesController {
   private final RecyclerView categoryOverviewView;
   private final TextView welcomeView;
   private final View categoryOverviewLayout;
+  private final RecipesDatabaseHelper.RecipesDatabaseCallback recipesDatabaseCallback;
   private CategoryOverviewAdapter overviewAdapter;
   private RecipeActionFragment recipeActionFragment;
   private RecipesOverviewFragment recipesOverviewFragment;
@@ -60,17 +61,23 @@ public class RecipesController {
     categoryOverviewView.setLayoutManager(new GridLayoutManager(context, 2));
     welcomeView = categoryOverviewLayout.findViewById(R.id.welcome_view);
 
-    this.recipesDatabaseHelper.addRecipesDatabaseCallback(
-        new RecipesDatabaseHelper.RecipesDatabaseCallback() {
-          @Override
-          public void onDatabaseUpdated() {
-            recipesDatabaseHelper.removeRecipesDatabaseCallback(this);
-            overviewAdapter = new CategoryOverviewAdapter(
-                recipesDatabaseHelper.getCategoriesData().getCategoryGroupDatas());
-            categoryOverviewView.setAdapter(overviewAdapter);
-            showCategoryOverview(false);
-          }
-        });
+    this.recipesDatabaseCallback = new RecipesDatabaseHelper.RecipesDatabaseCallback() {
+      @Override
+      public void onDatabaseUpdated() {
+        boolean showCategoryOverview = false;
+        if (overviewAdapter == null) {
+          overviewAdapter = new CategoryOverviewAdapter();
+          categoryOverviewView.setAdapter(overviewAdapter);
+          showCategoryOverview = true;
+        }
+        overviewAdapter.updateCategoryGroups(
+            recipesDatabaseHelper.getCategoriesData().getCategoryGroupDatas());
+        if (showCategoryOverview) {
+          showCategoryOverview(false);
+        }
+      }
+    };
+    this.recipesDatabaseHelper.addRecipesDatabaseCallback(recipesDatabaseCallback);
   }
 
   private void showRecipesOverviewFragment(CategoriesData.CategoryGroupData categoryGroupData) {
@@ -177,7 +184,7 @@ public class RecipesController {
         }
 
         recipesDatabaseHelper.insert(recipeRowData);
-        hideFragment(recipeActionFragment);
+        hideRecipeActionFragment();
         break;
       case RecipeActionFragment.ACTION_EDIT:
         RecipeRowData originalData = recipeActionFragment.getRecipeRowData();
@@ -259,23 +266,34 @@ public class RecipesController {
   }
 
   public boolean onBackPressed() {
-    return hideFragment(recipeActionFragment) || hideFragment(recipesOverviewFragment);
+    return hideRecipeActionFragment() || hideRecipesOverviewFragment();
   }
 
-  private boolean hideFragment(BaseFragment fragment) {
-    if (fragment == null) {
+  private boolean hideRecipeActionFragment() {
+    if (recipeActionFragment == null) {
       return false;
     }
-    fragment.removeFragment();
-    reset();
+    recipeActionFragment.removeFragment();
+    recipeActionFragment = null;
+
+    if (recipesOverviewFragment == null) {
+      showCategoryOverview(true);
+    } else {
+      Scene scene = new Scene(actionFragmentContainer, recipesOverviewFragment.getView());
+      TransitionManager.go(scene, getRecipeActionSceneTransition(recipesOverviewFragment.getView()));
+      fabController.setFabAction(FabController.ACTION_NONE);
+    }
     return true;
   }
 
-  private void reset() {
-    fabController.setFabAction(FabController.ACTION_ADD);
-    recipeActionFragment = null;
+  private boolean hideRecipesOverviewFragment() {
+    if (recipesOverviewFragment == null) {
+      return false;
+    }
+    recipesOverviewFragment.removeFragment();
     recipesOverviewFragment = null;
     showCategoryOverview(true);
+    return true;
   }
 
   @Nullable
@@ -286,11 +304,10 @@ public class RecipesController {
   private class CategoryOverviewAdapter
       extends RecyclerView.Adapter<CategoryOverviewAdapter.ViewHolder> {
 
-    private final List<CategoriesData.CategoryGroupData> categoryGroups;
     private final View.OnClickListener onClickListener;
+    private List<CategoriesData.CategoryGroupData> categoryGroups;
 
-    private CategoryOverviewAdapter(List<CategoriesData.CategoryGroupData> categoryGroups) {
-      this.categoryGroups = Preconditions.checkNotNull(categoryGroups);
+    private CategoryOverviewAdapter() {
       this.onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -299,6 +316,11 @@ public class RecipesController {
               CategoryOverviewAdapter.this.categoryGroups.get(viewHolder.getLayoutPosition()));
         }
       };
+    }
+
+    private void updateCategoryGroups(List<CategoriesData.CategoryGroupData> categoryGroups) {
+      this.categoryGroups = Preconditions.checkNotNull(categoryGroups);
+      notifyDataSetChanged();
     }
 
     @NonNull

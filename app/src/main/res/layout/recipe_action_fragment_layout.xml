@@ -20,16 +20,17 @@
             android:layout_height="wrap_content"
             android:textColor="@color/primaryTextColor"
             android:textColorHint="@color/primaryHintTextColor"
-            android:hint="@string/recipe_name"/>
+            android:hint="@string/recipe_name"
+            style="@style/EditTextStyle"/>
 
         <android.support.v7.widget.AppCompatEditText
             android:id="@+id/recipe_category_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
             android:textColor="@color/primaryTextColor"
             android:textColorHint="@color/primaryHintTextColor"
-            android:hint="@string/recipe_category"/>
+            android:hint="@string/recipe_category"
+            style="@style/EditTextCategoryStyle"/>
 
     </LinearLayout>
 

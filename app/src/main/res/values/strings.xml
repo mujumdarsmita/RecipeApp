@@ -9,7 +9,6 @@
     <string name="recipe_name">Name</string>
     <string name="ingredients">Ingredients</string>
     <string name="ingredients_name">Ingredient name</string>
-    <string name="quantity">Qty</string>
     <string name="units">Units</string>
     <string name="display_image">Recipe Photo</string>
     <string name="upload_display_image">Upload photo</string>

@@ -6,7 +6,19 @@
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryDark">@color/primaryDarkColor</item>
         <item name="colorAccent">@color/secondaryColor</item>
-        <item name="android:fontFamily">"sans-serif"</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="EditTextStyle">
+        <item
+            name="android:digits">"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"</item>
+        <item name="android:inputType">text|textNoSuggestions</item>
+    </style>
+
+    <style name="EditTextCategoryStyle">
+        <item
+            name="android:digits">"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789, "</item>
+        <item name="android:inputType">text|textNoSuggestions</item>
     </style>
 
 </resources>

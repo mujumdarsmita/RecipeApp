@@ -7,6 +7,7 @@
     <color name="secondaryLightColor">#b085f5</color>
     <color name="secondaryDarkColor">#4d2c91</color>
     <color name="primaryTextColor">#ffffff</color>
+    <color name="primaryDarkTextColor">#000000</color>
     <color name="primaryHintTextColor">#f5f5f5</color>
     <color name="headingTextColor">#000000</color>
     <color name="backgroundColor_100">#f5f5f5</color>
