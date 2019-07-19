@@ -48,7 +48,7 @@ public class RecipeActionFragment extends BaseFragment {
    */
   @Retention(RetentionPolicy.SOURCE)
   @IntDef({ACTION_ADD, ACTION_DISPLAY, ACTION_EDIT})
-  @interface RecipeAction {}
+  @interface ActionMode {}
 
   // Describes the show recipe action.
   public static final int ACTION_ADD = 0;
@@ -58,7 +58,7 @@ public class RecipeActionFragment extends BaseFragment {
   public static final int ACTION_EDIT = 2;
 
   private LinearLayout recipeEntryFragmentLayout;
-  private @RecipeAction int recipeAction = ACTION_ADD;
+  private @ActionMode int actionMode = ACTION_ADD;
   private FragmentCallback callback;
   private RecipeRowData recipeRowData;
   private IngredientsListAdapter ingredientsListAdapter;
@@ -138,23 +138,38 @@ public class RecipeActionFragment extends BaseFragment {
     updateMode();
   }
 
-  public void init(RecipeRowData recipeRowData, @RecipeAction int recipeAction) {
-    this.recipeRowData = recipeRowData;
-    this.recipeAction = recipeAction;
-    if (recipeRowData == null) {
-      Preconditions.checkArgument(recipeAction == ACTION_ADD);
-    } else {
-      Preconditions.checkArgument(recipeAction == ACTION_DISPLAY || recipeAction == ACTION_EDIT);
-    }
+  public void setRecipeRowData(RecipeRowData recipeRowData) {
+    this.recipeRowData = Preconditions.checkNotNull(recipeRowData);
     updateMode();
+  }
+
+  public void setActionMode(@ActionMode int mode) {
+    @ActionMode int prevActionMode = actionMode;
+    this.actionMode = mode;
+    if (prevActionMode != mode) {
+      updateMode();
+    }
   }
 
   private void updateMode() {
     if (!isInitialized) {
       return;
     }
+
+    // TODO(Smita) : Maybe throw an exception in these case.
+    if (recipeRowData == null && actionMode != ACTION_ADD) {
+      // Cannot perform the other actions if there is no recipe to display.
+      // TODO(Smita) : Maybe throw an exception in these case.
+      return;
+    }
+    if (recipeRowData != null && actionMode == ACTION_ADD) {
+      // Cannot perform the add actions on an recipe which is already present.
+
+      return;
+    }
+
     reset();
-    switch (recipeAction) {
+    switch (actionMode) {
       case ACTION_EDIT:
         enableUserInput();
       case ACTION_DISPLAY:
@@ -219,10 +234,6 @@ public class RecipeActionFragment extends BaseFragment {
     recipeCategoryView.setBackground(null);
 
     addIngredientsButton.setVisibility(View.GONE);
-  }
-
-  public @RecipeAction int getRecipeAction() {
-    return recipeAction;
   }
 
   /**
@@ -400,11 +411,11 @@ public class RecipeActionFragment extends BaseFragment {
 
       private void update() {
         IngredientRowData rowData = ingredientRowDataList.get(getAdapterPosition());
-        enableTextChangedListeners(recipeAction != ACTION_DISPLAY);
+        enableTextChangedListeners(actionMode != ACTION_DISPLAY);
         name.setText(rowData.getName());
         quantity.setText(String.valueOf(rowData.getQuantity()));
         units.setText(rowData.getUnit());
-        removeButton.setVisibility(recipeAction == ACTION_DISPLAY ? View.GONE : View.VISIBLE);
+        removeButton.setVisibility(actionMode == ACTION_DISPLAY ? View.GONE : View.VISIBLE);
       }
 
       private void enableTextChangedListeners(boolean enabled) {

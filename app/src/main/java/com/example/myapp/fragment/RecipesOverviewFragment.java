@@ -25,19 +25,12 @@ public class RecipesOverviewFragment extends BaseFragment {
   }
 
   public static final String TAG = "RecipesOverviewFragment";
-  private static final String CATEGORY_GROUP_DATA = "category_group_data";
-  private static final String RECIPE_SELECTED_CALLBACK = "recipe_selected_callback";
   private static final float ASPECT_RATIO = 1.777779f;
 
-  public static RecipesOverviewFragment newInstance(
-      CategoryGroupData categoryGroupData,
-      FragmentCallback fragmentCallback,
-      OnRecipeSelectedCallback onRecipeSelectedCallback) {
+  public static RecipesOverviewFragment newInstance(FragmentCallback fragmentCallback) {
     RecipesOverviewFragment fragment = new RecipesOverviewFragment();
     Bundle bundle = new Bundle();
     bundle.putSerializable(ON_VIEW_CREATED_CALLBACK, fragmentCallback);
-    bundle.putSerializable(CATEGORY_GROUP_DATA, categoryGroupData);
-    bundle.putSerializable(RECIPE_SELECTED_CALLBACK, onRecipeSelectedCallback);
     fragment.setArguments(bundle);
     return fragment;
   }
@@ -55,13 +48,18 @@ public class RecipesOverviewFragment extends BaseFragment {
     Bundle bundle = getArguments();
     if (bundle != null) {
       callback = (FragmentCallback) bundle.getSerializable(ON_VIEW_CREATED_CALLBACK);
-      categoryGroupData = (CategoryGroupData) bundle.getSerializable(CATEGORY_GROUP_DATA);
-      onRecipeSelectedCallback =
-          (OnRecipeSelectedCallback) bundle.getSerializable(RECIPE_SELECTED_CALLBACK);
     }
     recipeOverviewFragmentLayout =
         (RecyclerView) inflater.inflate(R.layout.recipe_overview_fragment_layout, null);
     return recipeOverviewFragmentLayout;
+  }
+
+  public void setCategoryGroupData(CategoryGroupData categoryGroupData) {
+    this.categoryGroupData = Preconditions.checkNotNull(categoryGroupData);
+  }
+
+  public void setOnRecipeSelectedCallback(OnRecipeSelectedCallback onRecipeSelectedCallback) {
+    this.onRecipeSelectedCallback = Preconditions.checkNotNull(onRecipeSelectedCallback);
   }
 
   @Override

@@ -61,7 +61,7 @@ public class FabController {
           onAddClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-              recipesController.showRecipeEntryFragment();
+              recipesController.setMode(RecipesController.ADD_RECIPE);
             }
           };
         }
@@ -72,7 +72,7 @@ public class FabController {
           onEditClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-              recipesController.showRecipeEditFragment();
+              recipesController.setMode(RecipesController.EDIT_RECIPE);
             }
           };
         }
